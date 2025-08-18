@@ -1,0 +1,126 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: tfc-s3-bucket-from-vcs
+  title: "Create S3 Bucket (Terraform Cloud Run)"
+  description: Creates a Terraform run to create an S3 Bucket on behalf of the user.
+spec:
+  owner: platform-engineering
+  type: automation
+
+  parameters:
+    - title: Terraform Inputs
+      required: [bucketName, awsRegion]
+      properties:
+        bucketName:
+          type: string
+          title: Bucket name
+          description: "Globally unique S3 bucket name (3–63 chars, lowercase, digits, dots, hyphens)"
+          pattern: '^[a-z0-9.-]{3,63}$'
+        awsRegion:
+          type: string
+          title: AWS region
+          default: ap-northeast-2
+          enum:
+            - ap-northeast-2
+            - us-east-1
+            - us-west-2
+            - eu-west-1
+            - eu-central-1
+            - ap-southeast-1
+            - ap-southeast-2
+            - ap-northeast-1
+          enumNames:
+            - ap-northeast-2 (Seoul)
+            - us-east-1 (N. Virginia)
+            - us-west-2 (Oregon)
+            - eu-west-1 (Ireland)
+            - eu-central-1 (Frankfurt)
+            - ap-southeast-1 (Singapore)
+            - ap-southeast-2 (Sydney)
+            - ap-northeast-1 (Tokyo)
+        # Hidden defaults for TFC linkage & linking in outputs
+        tfcOrg:
+          type: string
+          default: developer-hub
+          ui:widget: hidden
+        workspaceSlug:
+          type: string
+          default: dev
+          ui:widget: hidden
+        workspaceId:
+          type: string
+          default: ws-5fEMLLvB4ad2B9JD
+          ui:widget: hidden
+
+  steps:
+    - id: tfc-queue-run
+      name: Queue Terraform Run
+      action: http:backstage:request
+      input:
+        method: POST
+        path: /proxy/tfc/runs
+        headers:
+          content-type: application/json
+        body:
+          data:
+            type: runs
+            attributes:
+              message: "Create S3 Bucket - Developer Hub User ${{ user.entity.metadata.name }}"
+              auto-apply: true
+              variables:
+                - key: bucket_name
+                  value: '"${{ parameters.bucketName }}"'
+                - key: aws_region
+                  value: '"${{ parameters.awsRegion }}"'
+            relationships:
+              workspace:
+                data:
+                  type: workspaces
+                  id: ${{ parameters.workspaceId }}
+
+    # - id: serialize-response
+    #   name: Serialize Response JSON
+    #   action: roadiehq:utils:serialize:json
+    #   input:
+    #     data: ${{ steps['tfc-queue-run'].output }}
+
+    # - id: debug-log-http-response
+    #   name: Log the Terraform Response
+    #   action: debug:log
+    #   input: 
+    #     message: ${{ steps['serialize-response'].output.serialized }}
+
+    - id: create-file
+      name: Write Response to File
+      action: roadiehq:utils:fs:write
+      input:
+        path: ./response.json
+        content: ${{ steps['tfc-queue-run'].output.body.message }}
+
+    - id: parse-to-json
+      name: Parse Response
+      action: roadiehq:utils:fs:parse
+      input:
+        path: ./response.json
+        parser: json
+
+    # - id: serialize-json
+    #   name: Serialize Parsed JSON Body
+    #   action: roadiehq:utils:serialize:json
+    #   input:
+    #     data: ${{ steps['parse-to-json'].output }}
+
+    # - id: debug-log-parsed-json
+    #   name: Log the Parsed JSON
+    #   action: debug:log
+    #   input: 
+    #     message: ${{ steps['serialize-json'].output.serialized }}
+
+  output:
+    text:
+      - title: Run ID
+        content: "${{ steps['parse-to-json'].output.content['data']['id'] }}"
+    links:
+      - title: "View Terraform Cloud Run"
+        url: https://app.terraform.io/app/${{ parameters.tfcOrg }}/${{ parameters.workspaceSlug }}/runs/${{ steps['parse-to-json'].output.content['data']['id'] }}
