@@ -1,0 +1,172 @@
+---
+# Backstage Templates for terraform-provider-rhcs examples
+# Based on: https://github.com/terraform-redhat/terraform-provider-rhcs/tree/main/examples
+
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-account-roles
+  title: Create Account Roles
+  description: Create AWS account roles required for ROSA clusters
+  tags:
+    - rosa
+    - openshift
+    - terraform
+spec:
+  owner: platform-engineering
+  type: automation
+  steps:
+    - id: debug-log
+      name: Debug Log
+      action: debug:log
+      input:
+        message: "Creating AWS account roles for ROSA clusters"
+
+---
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-rosa-cluster-managed-oidc
+  title: Create ROSA Cluster with Managed OIDC
+  description: Create a ROSA cluster using STS with managed OIDC configuration
+  tags:
+    - rosa
+    - openshift
+    - terraform
+spec:
+  owner: platform-engineering
+  type: automation
+  steps:
+    - id: debug-log
+      name: Debug Log
+      action: debug:log
+      input:
+        message: "Creating ROSA cluster with STS and managed OIDC configuration"
+
+---
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-rosa-cluster-unmanaged-oidc
+  title: Create ROSA Cluster with Unmanaged OIDC
+  description: Create a ROSA cluster using STS with unmanaged OIDC configuration
+  tags:
+    - rosa
+    - openshift
+    - terraform
+spec:
+  owner: platform-engineering
+  type: automation
+  steps:
+    - id: debug-log
+      name: Debug Log
+      action: debug:log
+      input:
+        message: "Creating ROSA cluster with STS and unmanaged OIDC configuration"
+
+---
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-machine-pool
+  title: Create Machine Pool
+  description: Add a machine pool to an existing ROSA cluster
+  tags:
+    - rosa
+
+    - compute
+    - openshift
+    - terraform
+spec:
+  owner: platform-engineering
+  type: automation
+  steps:
+    - id: debug-log
+      name: Debug Log
+      action: debug:log
+      input:
+        message: "Creating machine pool for ROSA cluster"
+
+---
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-identity-provider
+  title: Create Identity Provider
+  description: Configure an identity provider for a ROSA cluster
+  tags:
+    - rosa
+    - openshift
+    - terraform
+spec:
+  owner: platform-engineering
+  type: automation
+  steps:
+    - id: debug-log
+      name: Debug Log
+      action: debug:log
+      input:
+        message: "Creating identity provider for ROSA cluster"
+
+---
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-oidc-configuration
+  title: Create OIDC Configuration
+  description: Set up OIDC configuration resources for ROSA cluster
+  tags:
+    - rosa
+    - openshift
+    - terraform
+spec:
+  owner: platform-engineering
+  type: automation
+  steps:
+    - id: debug-log
+      name: Debug Log
+      action: debug:log
+      input:
+        message: "Creating OIDC configuration resources for ROSA cluster"
+
+---
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-operator-roles
+  title: Create Operator Roles
+  description: Create operator roles required for ROSA cluster operations
+  tags:
+    - rosa
+    - openshift
+    - terraform
+spec:
+  owner: platform-engineering
+  type: automation
+  steps:
+    - id: debug-log
+      name: Debug Log
+      action: debug:log
+      input:
+        message: "Creating operator roles for ROSA cluster operations"
+
+---
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-cluster-admin
+  title: Create Cluster Admin
+  description: Create a cluster admin user for ROSA cluster
+  tags:
+    - rosa
+    - openshift
+    - terraform
+spec:
+  owner: platform-engineering
+  type: automation
+  steps:
+    - id: debug-log
+      name: Debug Log
+      action: debug:log
+      input:
+        message: "Creating cluster admin user for ROSA cluster"
