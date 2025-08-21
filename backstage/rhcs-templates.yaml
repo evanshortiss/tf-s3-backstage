@@ -80,12 +80,129 @@ metadata:
 spec:
   owner: platform-engineering
   type: automation
+  parameters:
+    - title: Machine Pool Configuration
+      required:
+        - cluster_name
+        - pool_name
+        - instance_type
+      properties:
+        cluster_name:
+          title: Cluster Name
+          type: string
+          description: Name of the existing ROSA cluster
+          enum:
+            - webapp-prod-01
+            - api-staging-02
+            - ml-dev-03
+            - frontend-prod-04
+            - backend-test-01
+            - analytics-prod-02
+            - microservices-staging-01
+            - platform-dev-05
+          enumNames:
+            - "webapp-prod-01 (Production)"
+            - "api-staging-02 (Staging)"
+            - "ml-dev-03 (Development)"
+            - "frontend-prod-04 (Production)"
+            - "backend-test-01 (Test)"
+            - "analytics-prod-02 (Production)"
+            - "microservices-staging-01 (Staging)"
+            - "platform-dev-05 (Development)"
+          default: webapp-prod-01
+        pool_name:
+          title: Machine Pool Name
+          type: string
+          description: Name for the new machine pool
+          pattern: '^[a-z0-9-]+$'
+          minLength: 1
+          maxLength: 63
+        instance_type:
+          title: Instance Type
+          type: string
+          description: EC2 instance type for worker nodes
+          enum:
+            - m5.xlarge
+            - m5.2xlarge
+            - m5.4xlarge
+            - m6i.xlarge
+            - m6a.xlarge
+            - m6a.2xlarge
+            - m6g.xlarge
+            - m6g.2xlarge
+          enumNames:
+            - "m5.xlarge (x86 Intel, 4 vCPU, 16 GiB RAM)"
+            - "m5.2xlarge (x86 Intel, 8 vCPU, 32 GiB RAM)"
+            - "m5.4xlarge (x86 Intel, 16 vCPU, 64 GiB RAM)"
+            - "m6i.xlarge (x86 Intel, 4 vCPU, 16 GiB RAM)"
+            - "m6a.xlarge (x86 AMD, 4 vCPU, 16 GiB RAM)"
+            - "m6a.2xlarge (x86 AMD, 8 vCPU, 32 GiB RAM)"
+            - "m6g.xlarge (ARM, 4 vCPU, 16 GiB RAM)"
+            - "m6g.2xlarge (ARM, 8 vCPU, 32 GiB RAM)"
+          default: m5.xlarge
+        enable_autoscaling:
+          title: Enable Autoscaling
+          type: boolean
+          description: Enable autoscaling for this machine pool
+          default: false
+      dependencies:
+        enable_autoscaling:
+          oneOf:
+            - properties:
+                enable_autoscaling:
+                  const: true
+                min_replicas:
+                  title: Minimum Replicas
+                  type: integer
+                  description: Minimum number of worker nodes
+                  minimum: 1
+                  maximum: 4
+                  default: 1
+                max_replicas:
+                  title: Maximum Replicas
+                  type: integer
+                  description: Maximum number of worker nodes
+                  minimum: 4
+                  maximum: 8
+                  default: 3
+              required:
+                - min_replicas
+                - max_replicas
+            - properties:
+                enable_autoscaling:
+                  const: false
+                replica_count:
+                  title: Replica Count
+                  type: integer
+                  description: Fixed number of worker nodes
+                  minimum: 1
+                  maximum: 8
+                  default: 2
+              required:
+                - replica_count
   steps:
-    - id: debug-log
-      name: Debug Log
-      action: debug:log
+    - id: tfc-queue-run
+      name: Queue Terraform Run
+      action: roadiehq:utils:sleep
       input:
-        message: "Creating machine pool for ROSA cluster"
+        amount: 3
+
+    - id: create-file
+      name: Store Response
+      action: roadiehq:utils:sleep
+      input:
+        amount: 1
+
+    - id: parse-to-json
+      name: Retrieve Run ID
+      action: roadiehq:utils:sleep
+      input:
+        amount: 1
+
+  output:
+    links:
+      - title: "View Terraform Cloud Run"
+        url: https://app.terraform.io/app/placeholder-org/placeholder-workspace/runs/placeholder-run-id
 
 ---
 apiVersion: scaffolder.backstage.io/v1beta3
